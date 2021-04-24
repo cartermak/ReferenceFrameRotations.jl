@@ -91,7 +91,7 @@ function orthonormalize_split(dcm::DCM)
     E_sym = (1/2)*dcm*transpose(dcm) - I
 
     # Calculate corrected matrix
-    transpose(dcm)*(I-E_sym)
+    transpose(transpose(dcm)*(I-E_sym))
 end
 
 function orthonormalize_gs(dcm::DCM)
