@@ -50,8 +50,11 @@ end
 """
     orthonormalize(dcm::DCM)
 
-Perform the Gram-Schmidt orthonormalization process in the DCM `dcm` and return
+Perform the orthonormalization process in the DCM `dcm` and return
 the new matrix.
+
+Optional argument `method` accepts values of 'gs' (Gram-Schmidt) or 'split'
+(algorithm to split error between rows).
 
 **Warning**: This function does not check if the columns of the input matrix
 span a three-dimensional space. If not, then the returned matrix should have
@@ -70,7 +73,28 @@ julia> orthonormalize(D)
  0.0  0.0  1.0
 ```
 """
-function orthonormalize(dcm::DCM)
+
+@enum Orthonormalize_Method gs split
+
+function orthonormalize(dcm::DCM,method=gs)
+    if method == gs
+        orthonormalize_gs(dcm)
+    else if method == split
+        orthonormalize_split(dcm)
+    else
+        error("Unknown orthonormalization method.")
+    end
+end
+
+function orthonormalize_split(dcm::DCM)
+    # Calculate symmetric error matrix E_sym
+    E_sym = (1/2)*dcm*transpose(dcm) - I
+
+    # Calculate corrected matrix
+    transpose(dcm)*(I-E_sym)
+end
+
+function orthonormalize_gs(dcm::DCM)
     e₁ = dcm[:,1]
     e₂ = dcm[:,2]
     e₃ = dcm[:,3]
